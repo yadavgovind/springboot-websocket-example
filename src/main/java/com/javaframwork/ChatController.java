@@ -1,15 +1,20 @@
 package com.javaframwork;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 
-@Controller
+@RestController
 public class ChatController {
+	
+	@Autowired
+	private SimpMessageSendingOperations messagingTemplate;
 	
 	@MessageMapping("/userRegister")
 	@SendTo("/public")
@@ -23,7 +28,10 @@ public class ChatController {
 	@MessageMapping("/messageSend")
 	@SendTo("/public")
 	public ChatResponseDto sendMessage(@Payload ChatResponseDto chatResponseDto) {
-		chatResponseDto.setRess("response darta");
+		chatResponseDto.setRess("response data");
+		messagingTemplate.convertAndSend("/notificationSent",
+				new Notification(chatResponseDto.getContent()+" successfully updated", 200));
+		 
 		return chatResponseDto;
 	}
 
